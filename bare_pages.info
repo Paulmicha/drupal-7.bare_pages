@@ -1,0 +1,3 @@
+name = Bare pages
+description = This is a fork & "fragmentation" of the 'modalframe' contrib module. It provides a generic way to render only page content (e.g. without blocks, sidebar regions, admin menus, etc.). Its main purpose is to facilitate the use of iframes, often inside modal popups. Planned support for Colorbox and Bootstrap - for jquery UI Dialog, prefer the original 'modalframe' module.
+core = 7.x
