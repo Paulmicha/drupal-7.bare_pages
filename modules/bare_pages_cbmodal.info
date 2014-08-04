@@ -1,0 +1,5 @@
+name = Bare Pages Colorbox modal
+description = Implements 'bare_pages' modals using Colorbox (with load + iframe option)
+dependencies[] = bare_pages
+dependencies[] = colorbox
+core = 7.x

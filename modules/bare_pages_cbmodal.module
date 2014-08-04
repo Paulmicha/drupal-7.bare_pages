@@ -1,0 +1,53 @@
+<?php
+
+/**
+ * @file bare_pages_cbmodal.module
+ * Implement 'bare_pages' modals using Colorbox (with load + iframe option)
+ */
+
+/**
+ * Implement hook_detect_bp_child_context()
+ * Colorbox iframes use the following GET param : iframe=true
+ */
+function bare_pages_cbmodal_detect_bp_child_context() {
+  if (!empty($_GET['iframe'])) {
+    return true;
+  }
+  return false;
+}
+
+/**
+ * Implement hook_bp_child_context_activated()
+ */
+function bare_pages_cbmodal_bp_child_context_activated() {
+  $module_path = drupal_get_path('module', 'bare_pages_cbmodal');
+  drupal_add_js($module_path .'/js/child.js');
+}
+
+/**
+ * Implement hook_form_alter()
+ * When we are inside a Colorbox modal iframe page request,
+ * by default, for now, any form submission will close the modal
+ * (thus, skipping any kind of redirection on submission).
+ * @see bare_pages_close_modal()
+ * @todo 2014/06/23 16:13:01 - make this reaction customizable and/or allow filtering affected forms ?
+ */
+function bare_pages_cbmodal_form_alter(&$form, &$form_state, $form_id) {
+  // update 2014/06/25 17:37:02 - File upload widget causes trouble it seems
+  // -> move "context" detection in submit handler
+  //$active_context = bare_pages_get_context();
+  //if ($active_context == 'child') {
+    bare_pages_fapiu_ashr($form, $form_state, 'bare_pages_cbmodal_form_submit');
+  //}
+}
+
+/**
+ * Submit handler (for ANY form inside Colorbox modal pages)
+ */
+function bare_pages_cbmodal_form_submit($form, &$form_state) {
+  $active_context = bare_pages_get_context();
+  if ($active_context == 'child') {
+    // Tell the parent window to close the modal frame dialog.
+    bare_pages_close_modal();
+  }
+}

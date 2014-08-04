@@ -9,14 +9,33 @@
  * Implement hook_init()
  */
 function bare_pages_init() {
-  if (bare_pages_context_conditions_check('child')) {
+  $active_context = bare_pages_get_context();
+  if ($active_context == 'child') {
     bare_pages_set_child_context();
   }
-  else if (bare_pages_context_conditions_check('parent')) {
+  else if ($active_context == 'parent') {
     bare_pages_set_parent_context();
   }
 }
 
+
+/**
+ * Get active "context"
+ * @param [optional] Boolean $rebuild : bypass statically cached conditions checks
+ * @return String 'child' | 'parent'
+ */
+function bare_pages_get_context($rebuild = FALSE) {
+  $context = &drupal_static(__FUNCTION__);
+  if (!isset($context) && !$rebuild) {
+    if (bare_pages_context_conditions_check('child')) {
+      $context = 'child';
+    }
+    else if (bare_pages_context_conditions_check('parent')) {
+      $context = 'parent';
+    }
+  }
+  return $context;
+}
 
 /**
  * Sets "parent" context
@@ -77,20 +96,20 @@ function bare_pages_context_conditions_check($type) {
   // Other modules' custom "context" detection
   $bool_arr = array();
   foreach (module_implements('detect_bp_' . $type . '_context') as $module) {
-    $bool_arr[] = module_invoke($module, 'bare_pages_detect_' . $type . '_context');
+    $bool_arr[] = module_invoke($module, 'detect_bp_' . $type . '_context');
   }
   
   // Default detection is OR
-  // (means any one saying true "wins")
-  // (if it was AND, any one saying false "wins")
+  // (means anyone saying true "wins")
+  // (if it was AND, anyone saying false "wins")
   // @todo configurable custom settings form for conditions checking method (AND)
   if (!empty($bool_arr)) {
     $checking_method = variable_get('bp_checking_method', 'OR');
     foreach($bool_arr as $bool) {
-      if ($detection_method == 'OR' && $bool) {
+      if ($checking_method == 'OR' && $bool) {
         return true;
       }
-      if ($detection_method == 'AND' && !$bool) {
+      if ($checking_method == 'AND' && !$bool) {
         return false;
       }
     }

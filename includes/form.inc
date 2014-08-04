@@ -29,32 +29,32 @@ function bare_pages_form_after_build($form, &$form_state) {
     // If so, the list of submit handlers is stored in the $form_state array
     // which is something we can also alter from here, luckily. :)
     // Remember: our goal here is to make sure $form_state['redirect'] is set
-    // to FALSE when the bare_pages_close_dialog() API is invoked, and that's
+    // to FALSE when the bare_pages_close_modal() API is invoked, and that's
     // because we want to tell the parent window to close the Bare Pages.
     if (!empty($form_state['submit_handlers']) && !in_array('bare_pages_form_submit', $form_state['submit_handlers'])) {
       $form_state['submit_handlers'][] = 'bare_pages_form_submit';
     }
 
     // Find form elements with submit handlers recursively.
-    bare_pages_form_after_build_recursive($form, $form_state);
+    bare_pages_fapiu_ashr($form, $form_state, 'bare_pages_form_submit');
   }
   return $form;
 }
 
 /**
- * Find form elements with submit handlers recursively.
- * @see modalframe.module
+ * Generic Helper : adds a submit handler anywhere in the $form
+ * (fapiu_ashr = Form API Utility : Add Submit Handler Recursively)
  */
-function bare_pages_form_after_build_recursive(&$elements, &$form_state) {
+function bare_pages_fapiu_ashr(&$elements, &$form_state, $submit_handler) {
   // Recurse through all children elements.
   foreach (element_children($elements) as $key) {
     if (isset($elements[$key]) && $elements[$key]) {
-      bare_pages_form_after_build_recursive($elements[$key], $form_state);
+      bare_pages_fapiu_ashr($elements[$key], $form_state, $submit_handler);
     }
   }
   // If this element has submit handlers, then append our own.
   if (isset($elements['#submit'])) {
-    $elements['#submit'][] = 'bare_pages_form_submit';
+    $elements['#submit'][] = $submit_handler;
   }
 }
 
@@ -64,17 +64,15 @@ function bare_pages_form_after_build_recursive(&$elements, &$form_state) {
  * When we are requested to close a modal dialog, we don't want Form API to
  * perform any redirection once the submitted form has been processed.
  *
- * When $form_state['redirect'] is set to FALSE, then Form API will simply
- * re-render the form with the values still in its fields. And this is all
- * we need to output the javascript that will tell the parent window to close
- * the child dialog.
- *
- * @ingroup forms
  * @see modalframe.module
+ * @see drupal_redirect_form()
  */
 function bare_pages_form_submit($form, &$form_state) {
-  if (!empty($GLOBALS['bare_pages_close_dialog'])) {
-    $form_state['redirect'] = FALSE;
+  if (!empty($GLOBALS['bare_pages_close_modal'])) {
+    // Hacky, but I don't see how to circumvent the "?destination=path" in any other way
+    unset($_GET['destination']);
+    $form_state['redirect'] = FALSE;// This seems to fail (on its own ?) -> using 'rebuild' as well
+    $form_state['rebuild'] = TRUE;
   }
 }
 

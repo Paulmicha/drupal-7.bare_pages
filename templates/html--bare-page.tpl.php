@@ -35,8 +35,8 @@
  * - $classes String of classes that can be used to style contextually through
  *   CSS.
  * 
- * @see bare_htmls_theme_registry_alter()
- * @see bare_htmls_preprocess_html()
+ * @see bare_pages_theme_registry_alter()
+ * @see bare_pages_preprocess_html()
  * @see template_preprocess_html()
  * @see template_preprocess()
  * @see theme()
